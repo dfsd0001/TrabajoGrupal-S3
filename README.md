@@ -1,9 +1,22 @@
-# Modelos No Supervisados — AI4I Predictive Maintenance
+<div align="center">
 
+# Modelos No Supervisados
 ## Segmentación de Perfiles Operacionales de Maquinaria Industrial
+### AI4I 2020 Predictive Maintenance Dataset
 
-**Materia:** Aprendizaje Automático  
-**Integrantes:**
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-F7931E?style=flat&logo=scikit-learn&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626?style=flat&logo=jupyter&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Completo-22C55E?style=flat)
+
+**Institución:** UEES — Universidad de Especialidades Espíritu Santo  
+**Materia:** Aprendizaje Automático — Maestría en Inteligencia Artificial
+
+</div>
+
+---
+
+## Integrantes
 
 | Nombre | Rol |
 |--------|-----|
@@ -13,61 +26,98 @@
 
 ---
 
+## Tabla de Contenidos
+
+1. [Descripción del Proyecto](#descripción-del-proyecto)
+2. [Dataset](#dataset)
+3. [Estructura del Repositorio](#estructura-del-repositorio)
+4. [Entorno de Trabajo](#entorno-de-trabajo)
+5. [Análisis Exploratorio](#1-análisis-exploratorio-eda)
+6. [Preprocesamiento](#2-preprocesamiento)
+7. [K-Means](#3-implementación-de-k-means)
+8. [DBSCAN](#4-implementación-de-dbscan)
+9. [PCA](#5-reducción-de-dimensionalidad-pca)
+10. [t-SNE](#6-visualización-con-t-sne)
+11. [Comparación de Modelos](#7-comparación-de-modelos)
+12. [Perfiles de Clusters](#8-perfiles-de-clusters)
+13. [Detección de Anomalías](#9-detección-de-anomalías)
+14. [Pipeline Completo](#10-pipeline-completo)
+15. [Análisis Crítico y Conclusiones](#análisis-crítico-y-conclusiones)
+16. [Referencias](#referencias)
+
+---
+
 ## Descripción del Proyecto
 
-Este proyecto implementa y compara algoritmos de aprendizaje no supervisado sobre el dataset **AI4I 2020 Predictive Maintenance** con el objetivo de identificar perfiles operacionales de maquinaria industrial, detectar anomalías y comunicar hallazgos de forma técnica y visual.
+Una plataforma IoT de monitoreo industrial necesita segmentar los perfiles de operación de sus activos para:
 
-El contexto del caso simula una plataforma industrial de monitoreo de activos que necesita segmentar los perfiles de operación de sus máquinas para optimizar estrategias de mantenimiento predictivo, reducir tiempos no planificados de parada y adaptar los umbrales de alerta por régimen operacional.
+- Optimizar estrategias de **mantenimiento predictivo** diferenciadas por régimen operacional
+- Reducir **tiempos no planificados de parada** mediante alertas tempranas por perfil
+- Adaptar **umbrales de tolerancia** según el tipo de operación identificada
+
+Se implementan y comparan cuatro técnicas de aprendizaje no supervisado: **K-Means**, **DBSCAN**, **PCA** y **t-SNE**, sobre el dataset AI4I 2020 Predictive Maintenance de 10 000 registros de sensores industriales reales.
 
 ---
 
 ## Dataset
 
-**Nombre:** AI4I 2020 Predictive Maintenance Dataset  
-**Fuente:** UCI Machine Learning Repository  
-**Registros:** 10 000  
-**Variables:** 8 (5 variables de sensores + tipo de máquina + identificador + variable de fallo)
+| Atributo | Detalle |
+|---|---|
+| **Nombre** | AI4I 2020 Predictive Maintenance Dataset |
+| **Fuente** | UCI Machine Learning Repository |
+| **Registros** | 10 000 |
+| **Variables de sensores** | 5 (temperatura, velocidad, torque, desgaste) |
 
-| Variable | Tipo | Descripción |
-|---|---|---|
-| `UDI` | Entero | Identificador único de registro (excluido del análisis) |
-| `Type` | Categórica | Tipo de máquina: L (bajo), M (medio), H (alto) |
-| `Air temperature [K]` | Continua | Temperatura del aire en Kelvin |
-| `Process temperature [K]` | Continua | Temperatura del proceso en Kelvin |
-| `Rotational speed [rpm]` | Continua | Velocidad rotacional en RPM |
-| `Torque [Nm]` | Continua | Torque en Newton-metro |
-| `Tool wear [min]` | Continua | Desgaste acumulado de herramienta en minutos |
-| `Machine failure` | Binaria | Variable de fallo: 0 = sin fallo, 1 = fallo (referencia, no usada en clustering) |
+### Variables
 
-**Distribución de fallos:** 9 664 registros sin fallo (96.6%) — 336 con fallo (3.4%)
+| Variable | Tipo | Descripción | Uso |
+|---|---|---|---|
+| `UDI` | Entero | Identificador único | Excluido |
+| `Type` | Categórica | Tipo de máquina: L / M / H | Referencia |
+| `Air temperature [K]` | Continua | Temperatura del aire | Incluida |
+| `Process temperature [K]` | Continua | Temperatura del proceso | Incluida |
+| `Rotational speed [rpm]` | Continua | Velocidad rotacional | Incluida |
+| `Torque [Nm]` | Continua | Torque | Incluida |
+| `Tool wear [min]` | Continua | Desgaste de herramienta | Incluida |
+| `Machine failure` | Binaria | Fallo (0/1) | Validación |
+
+> **Distribución:** 9 664 registros sin fallo (96.6%) — 336 con fallo (3.4%)  
+> **Por tipo:** L = 6 108 (61.1%) — M = 2 931 (29.3%) — H = 961 (9.6%)
 
 ---
 
 ## Estructura del Repositorio
 
 ```
-.
-├── assets/                          # Visualizaciones exportadas
+TrabajoGrupal-S3/
+│
+├── assets/                          ← Visualizaciones exportadas (300 DPI)
 │   ├── 01_distribucion_variables.png
 │   ├── 02_boxplots_tipo_maquina.png
 │   ├── 03_matriz_correlacion.png
 │   ├── 04_pairplot.png
 │   ├── 05_seleccion_k.png
-│   ├── 06_kmeans_clusters.png
-│   ├── 07_kdistance_graph.png
-│   ├── 08_dbscan_clusters.png
-│   ├── 09_pca_visualizacion.png
-│   ├── 10_tsne_visualizacion.png
-│   ├── 11_deteccion_anomalias.png
-│   ├── 12_comparacion_silhouette.png
+│   ├── 06_kmeans_silhouette.png
+│   ├── 07_kmeans_clusters.png
+│   ├── 08_kdistance_graph.png
+│   ├── 09_dbscan_clusters.png
+│   ├── 10_pca_visualizacion.png
+│   ├── 11_tsne_visualizacion.png
+│   ├── 12_comparacion_kmeans_dbscan.png
 │   ├── 13_heatmap_perfiles.png
-│   └── 14_pipeline_completo.png
+│   ├── 14_deteccion_anomalias.png
+│   └── 15_pipeline_completo.png
+│
 ├── data/
-│   └── ai4i_predictive_maintenance.csv
+│   └── ai4i_predictive_maintenance.csv   ← Dataset fuente
+│
 ├── notebooks/
-│   └── S3_ModelosNoSupervisados_AI4I.ipynb
+│   └── S3_ModelosNoSupervisados_AI4I.ipynb   ← Notebook principal
+│
 └── README.md
 ```
+
+> **Nota:** El notebook detecta automáticamente la raíz del repositorio sin importar desde dónde se ejecute (VS Code, Jupyter Lab, terminal). Las carpetas `assets/` y `data/` se resuelven siempre de forma correcta.
 
 ---
 
@@ -78,12 +128,10 @@ El contexto del caso simula una plataforma industrial de monitoreo de activos qu
 | Python | 3.10+ |
 | pandas | 2.x |
 | numpy | 1.x |
-| scikit-learn | 1.x |
+| scikit-learn | 1.3+ |
 | matplotlib | 3.x |
 | seaborn | 0.13.x |
-| Jupyter Notebook | 7.x |
-
-### Instalación de dependencias
+| Jupyter / VS Code | cualquier versión reciente |
 
 ```bash
 pip install pandas numpy scikit-learn matplotlib seaborn jupyter
@@ -91,121 +139,227 @@ pip install pandas numpy scikit-learn matplotlib seaborn jupyter
 
 ---
 
-## Metodología
+## 1. Análisis Exploratorio (EDA)
 
-El proyecto sigue un pipeline estructurado de aprendizaje no supervisado:
+### 1.1 Distribución de variables
 
-### 1. Análisis Exploratorio (EDA)
+Se analiza la distribución de las cinco señales de sensores. La temperatura del aire (~300 K) y la de proceso presentan distribuciones aproximadamente normales. La velocidad rotacional y el torque muestran asimetría, indicando distintos regímenes de operación. El desgaste de herramienta se distribuye de forma uniforme entre 0 y 253 minutos.
 
-- Estadísticas descriptivas de las 5 variables de sensores
-- Análisis de distribuciones mediante histogramas con medias anotadas
-- Boxplots diferenciados por tipo de máquina (L, M, H)
-- Matriz de correlación completa (variables + Machine failure)
-- Pairplot entre variables clave coloreado por estado de fallo
-
-**Hallazgo clave:** Correlación negativa fuerte entre Torque y Velocidad Rotacional (-0.88), y correlación positiva entre temperaturas del aire y del proceso (0.88).
-
-### 2. Preprocesamiento
-
-- Exclusión de la columna `UDI` (identificador sin valor predictivo)
-- La variable `Machine failure` se conserva como referencia pero no se incluye en el clustering
-- Codificación de la variable `Type` con `LabelEncoder`
-- Escalado con `StandardScaler` para garantizar que ninguna variable domine el cálculo de distancias euclideas
-
-### 3. K-Means
-
-- Evaluación de K entre 2 y 10 mediante método del codo (inercia) y coeficiente de silueta
-- K óptimo determinado en **K = 2** con Silhouette Score de **0.2109**
-- Entrenamiento final sobre el dataset completo (10 000 registros)
-- Visualización de clusters en 3 combinaciones de variables
-
-### 4. DBSCAN
-
-- Selección de `eps` mediante K-Distance Graph (distancia al 5° vecino más cercano)
-- Parámetros finales: `eps = 0.8`, `min_samples = 5`
-- Resultado: **2 clusters** y **261 puntos de ruido** (2.6% del total)
-- Silhouette Score (excluyendo ruido): **0.3197**
-
-### 5. PCA
-
-- Reducción de 5 dimensiones a 2 componentes principales
-- PC1 explica el **38.0%** de la varianza; PC2 el **20.4%** (acumulado: **58.4%**)
-- Visualización de clusters K-Means en el espacio PCA
-- Análisis de loadings para interpretación de componentes
-
-### 6. t-SNE
-
-- Reducción no lineal sobre muestra aleatoria de 2 000 puntos
-- Parámetros: `perplexity=30`, `learning_rate=200`, `max_iter=1000`
-- Visualización dual: clusters K-Means e intensidad de torque como gradiente de color
-- Revela sub-agrupaciones internas no detectables con PCA
-
-### 7. Detección de Anomalías
-
-- **Isolation Forest** (`contamination=0.05`): 500 anomalías detectadas
-- **Local Outlier Factor** (`n_neighbors=20`, `contamination=0.05`): 500 anomalías detectadas
-- Análisis de consenso entre ambos métodos
-- Validación cruzada con la variable `Machine failure`
+![Distribución de variables](assets/01_distribucion_variables.png)
 
 ---
 
-## Resultados Principales
+### 1.2 Boxplots por tipo de máquina
 
-### Perfiles Operacionales Identificados (K-Means, K=2)
+Comparación de las variables operacionales entre los tres tipos de máquina (L, M, H). Las medianas de velocidad y torque son similares entre tipos, mientras que el desgaste de herramienta muestra mayor variabilidad en el tipo H, coherente con regímenes de trabajo más intensivos.
 
-| Cluster | N° Máquinas | Temp. Aire [K] | Temp. Proceso [K] | Veloc. [rpm] | Torque [Nm] | Desgaste [min] | Tasa Fallo |
-|---|---|---|---|---|---|---|---|
-| C0 — Régimen Caliente | 4 955 | 301.6 | 311.8 | 1 535 | 39.8 | 126.8 | 3.3% |
-| C1 — Régimen Estándar | 5 045 | 298.5 | 308.3 | 1 533 | 40.4 | 124.1 | 3.4% |
+![Boxplots por tipo de máquina](assets/02_boxplots_tipo_maquina.png)
 
-### Comparación de Algoritmos de Clustering
+---
 
-| Algoritmo | Parámetros | Clusters | Outliers | Silhouette | Forma |
-|---|---|---|---|---|---|
-| K-Means | k=2 | 2 | 0 | 0.2109 | Esférica |
-| DBSCAN | eps=0.8, min_samples=5 | 2 | 261 | 0.3197 | Arbitraria |
+### 1.3 Matriz de correlación
 
-### Visualizaciones Generadas
+La correlación entre variables revela dos relaciones dominantes del sistema:
 
-| Archivo | Descripción |
+- **Torque ↔ Velocidad rotacional: −0.88** — relación inversa mecánica (mayor velocidad → menor torque disponible)
+- **Temperatura aire ↔ Temperatura proceso: +0.88** — interdependencia térmica del sistema
+- **Tool wear ↔ Machine failure: +0.17** — el desgaste acumulado es el predictor individual más relevante de fallo
+
+![Matriz de correlación](assets/03_matriz_correlacion.png)
+
+---
+
+### 1.4 Pairplot entre variables clave
+
+Visualización de relaciones bivariadas sobre una muestra de 800 registros, coloreada por estado de fallo. Los registros con fallo tienden a concentrarse en zonas de torque extremo y alta velocidad, indicando que el estrés mecánico es precursor de fallo.
+
+![Pairplot](assets/04_pairplot.png)
+
+---
+
+## 2. Preprocesamiento
+
+**Decisiones aplicadas:**
+
+| Decisión | Justificación |
 |---|---|
-| `01_distribucion_variables.png` | Histogramas de las 5 variables de sensores y distribución por tipo |
-| `02_boxplots_tipo_maquina.png` | Boxplots comparativos entre tipos L, M y H |
-| `03_matriz_correlacion.png` | Heatmap de correlaciones entre variables numéricas |
-| `04_pairplot.png` | Relaciones bivariadas coloreadas por estado de fallo |
-| `05_seleccion_k.png` | Método del codo y silhouette score para selección de K |
-| `06_kmeans_clusters.png` | Segmentación K-Means en tres proyecciones bidimensionales |
-| `07_kdistance_graph.png` | K-Distance Graph para selección de eps en DBSCAN |
-| `08_dbscan_clusters.png` | Segmentación DBSCAN con identificación de puntos de ruido |
-| `09_pca_visualizacion.png` | Varianza explicada, acumulada y clusters en espacio PCA |
-| `10_tsne_visualizacion.png` | Proyección t-SNE por clusters y por intensidad de torque |
-| `11_deteccion_anomalias.png` | Comparación Isolation Forest vs LOF |
-| `12_comparacion_silhouette.png` | Gráfico comparativo de silhouette score entre algoritmos |
-| `13_heatmap_perfiles.png` | Heatmap de valores medios por cluster y variable |
-| `14_pipeline_completo.png` | Diagrama del pipeline completo del proyecto |
+| Excluir `UDI` | Identificador sin contenido informativo |
+| Excluir `Machine failure` del clustering | Variable objetivo — aprendizaje no supervisado |
+| Codificar `Type` con `LabelEncoder` | Para análisis complementario por tipo |
+| Análisis de outliers por IQR | Cuantificación de valores atípicos por variable |
+| `StandardScaler` (media=0, std=1) | Garantiza equidad entre variables en distancias euclídeas |
+
+No se detectaron valores nulos, duplicados ni outliers extremos que requieran imputación o eliminación.
 
 ---
 
-## Análisis Crítico
+## 3. Implementación de K-Means
+
+### 3.1 Selección del número óptimo de clusters
+
+Se evalúan valores de K entre 2 y 10 mediante el **método del codo** (inercia) y el **coeficiente de silueta**. Ambos valores se anotan directamente sobre los gráficos para facilitar la lectura. Los umbrales de silhouette (0.25 y 0.50) se incluyen como referencia.
+
+![Selección de K](assets/05_seleccion_k.png)
+
+> **K óptimo = 2** con Silhouette Score de **0.2109**. El valor moderado es inherente a datos de sensores industriales con fronteras operacionales continuas — no discretas por naturaleza física del sistema.
+
+---
+
+### 3.2 Análisis silhouette detallado y centroides
+
+El silhouette plot muestra la cohesión interna de cada cluster muestra a muestra. El panel derecho proyecta los clusters en el espacio Torque–Velocidad con los centroides marcados y sus valores anotados.
+
+![Silhouette K-Means](assets/06_kmeans_silhouette.png)
+
+---
+
+### 3.3 Proyecciones 2D de clusters con fallos reales
+
+Tres proyecciones bidimensionales del dataset segmentado por K-Means, con los registros de fallo real superpuestos para validación visual de los perfiles.
+
+![Clusters K-Means](assets/07_kmeans_clusters.png)
+
+---
+
+## 4. Implementación de DBSCAN
+
+### 4.1 Selección de eps mediante K-Distance Graph
+
+El K-Distance Graph ordena los puntos por su distancia al 5° vecino más cercano. El punto de inflexión de la curva indica el valor óptimo de `eps`. Se realiza además un análisis de sensibilidad en grilla (eps × min_samples) impreso en el notebook.
+
+![K-Distance Graph](assets/08_kdistance_graph.png)
+
+> **Parámetros seleccionados:** `eps = 0.8`, `min_samples = 5`
+
+---
+
+### 4.2 Segmentación DBSCAN
+
+A diferencia de K-Means, DBSCAN identifica puntos de ruido (condiciones operacionales que no pertenecen a ningún cluster), los cuales tienen relevancia directa para el mantenimiento predictivo.
+
+![Clusters DBSCAN](assets/09_dbscan_clusters.png)
+
+| Resultado | Valor |
+|---|---|
+| Clusters encontrados | 2 |
+| Puntos de ruido | 261 (2.6%) |
+| Silhouette Score (sin ruido) | **0.3197** |
+
+---
+
+## 5. Reducción de Dimensionalidad — PCA
+
+PCA reduce las 5 dimensiones del dataset a 2 componentes principales para visualización. El **scree plot** muestra la varianza individual y acumulada. El **biplot de loadings** revela qué variables dominan cada componente.
+
+- **PC1 (38.0%):** captura la relación inversa torque–velocidad (loadings opuestos)
+- **PC2 (20.4%):** captura la variación térmica del sistema (loadings positivos en ambas temperaturas)
+- **Varianza acumulada con 2 componentes: 58.4%**
+
+![PCA](assets/10_pca_visualizacion.png)
+
+---
+
+## 6. Visualización con t-SNE
+
+t-SNE aplica reducción no lineal sobre 2 000 puntos. Sus tres paneles muestran:
+
+1. **Clusters K-Means** — separación de los grupos en el espacio no lineal
+2. **Gradiente de torque** — distribución continua de esta variable clave
+3. **Fallos reales superpuestos** — los fallos se concentran en zonas específicas, confirmando que los clusters reflejan patrones operacionales reales con distinto riesgo
+
+![t-SNE](assets/11_tsne_visualizacion.png)
+
+---
+
+## 7. Comparación de Modelos
+
+![Comparación](assets/12_comparacion_kmeans_dbscan.png)
+
+| Criterio | K-Means | DBSCAN |
+|---|---|---|
+| Parámetros | k=2, n_init=15 | eps=0.8, min_samples=5 |
+| Clusters | 2 | 2 |
+| Outliers detectados | 0 | 261 (2.6%) |
+| Silhouette Score | 0.2109 | **0.3197** |
+| Detecta ruido | No | Sí |
+| Forma de clusters | Esférica | Arbitraria |
+| Robustez al ruido | Baja | Alta |
+| Interpretabilidad | Alta | Media |
+
+**DBSCAN supera a K-Means en silhouette** y adicionalmente detecta anomalías operacionales validadas contra `Machine failure`.
+
+---
+
+## 8. Perfiles de Clusters
+
+El heatmap presenta los valores medios normalizados por cluster y variable. Las barras comparativas permiten visualizar las diferencias entre perfiles de forma directa.
+
+![Perfiles](assets/13_heatmap_perfiles.png)
+
+### Perfiles operacionales identificados
+
+| Cluster | Nombre | N° Máq. | Temp. Proceso [K] | Torque [Nm] | Desgaste [min] | Tasa Fallo |
+|---|---|---|---|---|---|---|
+| C0 | Régimen Caliente | 4 955 (49.6%) | 311.8 | 39.8 | 126.8 | 3.3% |
+| C1 | Régimen Estándar | 5 045 (50.5%) | 308.3 | 40.4 | 124.1 | 3.4% |
+
+La diferencia principal entre clusters reside en el **perfil térmico** (~3 K en temperatura de proceso). Las tasas de fallo similares indican que la temperatura por sí sola no determina el riesgo — el desgaste de herramienta y el torque extremo actúan como factores complementarios.
+
+---
+
+## 9. Detección de Anomalías
+
+Se aplican dos métodos complementarios y se analiza su consenso. Los puntos anómalos presentan una tasa de fallo significativamente mayor a la media global, confirmando que detectan condiciones operacionales de riesgo real y no solo ruido estadístico.
+
+![Anomalías](assets/14_deteccion_anomalias.png)
+
+| Método | Anomalías detectadas | Tasa fallo en anomalías | Ratio vs media global |
+|---|---|---|---|
+| Isolation Forest | 500 (5.0%) | superior a media | varias veces mayor |
+| LOF | 500 (5.0%) | superior a media | varias veces mayor |
+| Consenso (ambos) | subconjunto común | máxima confianza | mayor ratio |
+
+---
+
+## 10. Pipeline Completo
+
+El diagrama resume las 8 etapas del proyecto con sus parámetros y resultados clave.
+
+![Pipeline](assets/15_pipeline_completo.png)
+
+---
+
+## Análisis Crítico y Conclusiones
+
+### ¿Qué perfiles operacionales se identificaron?
+
+Los modelos convergieron en **dos perfiles diferenciados por régimen térmico**, lo que tiene sentido operacional: las máquinas industriales operan en ciclos de temperatura que definen su régimen de trabajo. Ambos perfiles presentan tasas de fallo similares, lo que indica que el riesgo de fallo no depende únicamente de la temperatura sino de la combinación de variables de estrés mecánico y desgaste acumulado.
+
+### Diferencias clave entre modelos
+
+K-Means es preferible cuando se necesita segmentación interpretable y exhaustiva (todos los registros asignados). DBSCAN es superior cuando se prioriza la detección de anomalías operacionales y la robustez ante ruido. PCA y t-SNE son técnicas complementarias: PCA para interpretación de variables dominantes, t-SNE para descubrimiento de sub-estructuras no lineales.
 
 ### Limitaciones
 
-- El silhouette score moderado (0.21–0.32) refleja la naturaleza continua de los datos de sensores industriales, donde las fronteras entre regímenes operacionales no son abruptas sino graduales. Esta característica es inherente a los sistemas físicos de manufactura y no indica un fallo del método.
-- PCA retiene el 58.4% de la varianza con 2 componentes, lo que implica una pérdida de información relevante al visualizar en 2D. Para análisis más exhaustivo se recomienda trabajar con 3-4 componentes (varianza acumulada ~80%).
-- La ausencia de etiquetas detalladas de tipo de fallo (solo disponible `Machine failure` binario) limita la validación semántica de los clusters con eventos de fallo específicos (overheat, tool wear failure, etc.).
+1. **Silhouette moderado (0.21–0.32):** inherente a datos de sensores continuos con fronteras operacionales graduales. No indica fallo del método.
+2. **PCA retiene el 58.4% de varianza con 2 componentes:** para análisis interno se recomiendan 4 componentes (~80% varianza).
+3. **Variable de fallo binaria:** la ausencia de etiquetas de tipo de fallo limita la validación semántica de los clusters.
+4. **t-SNE estocástico:** se fija `random_state=42` para reproducibilidad entre ejecuciones.
 
-### Propuestas de Mejora
+### Propuestas de mejora
 
-- Integrar variables de contexto como turno de trabajo, antigüedad de la máquina o historial de mantenimiento para enriquecer los perfiles de clustering.
-- Aplicar técnicas de clustering jerárquico (dendrogramas) para explorar la estructura a múltiples niveles de granularidad.
-- Usar los clusters como features adicionales en modelos supervisados (Random Forest, XGBoost) para mejorar la predicción de fallos.
-- Implementar monitoreo en tiempo real con actualización incremental de los clusters usando Mini-Batch K-Means.
+- **Integración SCADA:** los perfiles alimentan dashboards en tiempo real con alertas diferenciadas por régimen
+- **Modelos supervisados:** usar los clusters como features en Random Forest o XGBoost para clasificación de fallos
+- **Clustering jerárquico:** dendrogramas para explorar estructura a múltiples niveles de granularidad
+- **Mini-Batch K-Means:** actualización incremental sin reentrenar el modelo completo
+- **Variables contextuales:** incorporar turno, antigüedad de máquina o historial de mantenimiento
 
 ---
 
-## Recursos de Apoyo
+## Referencias
 
-- Scikit-learn — Clustering: https://scikit-learn.org/stable/modules/clustering.html
-- AI4I Dataset (UCI): https://archive.ics.uci.edu/ml/datasets/AI4I+2020+Predictive+Maintenance+Dataset
-- t-SNE: van der Maaten & Hinton (2008). Visualizing Data using t-SNE. JMLR.
-- DBSCAN: Ester et al. (1996). A Density-Based Algorithm for Discovering Clusters.
+- Matzka, S. (2020). **AI4I 2020 Predictive Maintenance Dataset**. UCI Machine Learning Repository. https://archive.ics.uci.edu/ml/datasets/AI4I+2020+Predictive+Maintenance+Dataset
+- Scikit-learn. **Clustering**. https://scikit-learn.org/stable/modules/clustering.html
+- van der Maaten, L. & Hinton, G. (2008). **Visualizing Data using t-SNE**. *Journal of Machine Learning Research*, 9, 2579–2605.
+- Ester, M. et al. (1996). **A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise**. KDD-96 Proceedings.
+- Liu, F. T., Ting, K. M., & Zhou, Z.-H. (2008). **Isolation Forest**. ICDM 2008.
